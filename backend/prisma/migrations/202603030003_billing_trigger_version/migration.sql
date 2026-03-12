@@ -1,0 +1,2 @@
+ALTER TABLE "billing_triggers"
+ADD COLUMN "version" INTEGER NOT NULL DEFAULT 1;

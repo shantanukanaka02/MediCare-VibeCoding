@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-page: #eff4f8;
+  --bg-card: #ffffff;
+  --bg-muted: #f4f8fb;
+  --text-main: #17212b;
+  --text-muted: #526071;
+  --line: #d8e2ea;
+  --primary: #0f766e;
+  --primary-strong: #115e59;
+  --primary-contrast: #ffffff;
+  --danger: #b91c1c;
+  --danger-contrast: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Trebuchet MS", Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at 5% 5%, #d8f3ff 0%, transparent 40%),
+    radial-gradient(circle at 95% 5%, #e8f5d6 0%, transparent 32%),
+    linear-gradient(165deg, #edf4f8 0%, #f7fafc 100%);
+}
+
+a {
+  color: inherit;
+}
+
+input:not([type="checkbox"]),
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fff;
+  color: var(--text-main);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input:not([type="checkbox"]):focus,
+select:focus,
+textarea:focus {
+  border-color: #67b9b3;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14);
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: 600;
+  transition: transform 0.08s ease, box-shadow 0.14s ease, background-color 0.14s ease;
+  cursor: pointer;
+}
+
+button:hover {
+  box-shadow: 0 3px 12px rgba(23, 33, 43, 0.12);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.app-btn-primary {
+  background: var(--primary);
+  color: var(--primary-contrast);
+}
+
+.app-btn-primary:hover {
+  background: var(--primary-strong);
+}
+
+.app-btn-secondary {
+  background: var(--bg-muted);
+  color: var(--text-main);
+  border: 1px solid var(--line);
+}
+
+.app-btn-danger {
+  background: var(--danger);
+  color: var(--danger-contrast);
+}
+
+.app-title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.app-subtitle {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}

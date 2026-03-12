@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ehcp
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: ./backend
+    env_file:
+      - ./backend/.env
+    # environment:
+    #   DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ehcp
+    #   REDIS_URL: redis://redis:6379
+    #   JWT_ACCESS_SECRET: replace_with_very_long_access_secret_value_32_plus
+    #   JWT_REFRESH_SECRET: replace_with_very_long_refresh_secret_value_32_plus
+    #   ENCRYPTION_KEY: replace_with_32_characters_minimum_secret_key
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "4000:4000"
+
+  frontend:
+    build:
+      context: ./frontend
+    # environment:
+    #   VITE_API_BASE_URL: http://localhost:4000
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+
+volumes:
+  pg_data:
