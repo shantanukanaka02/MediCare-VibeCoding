@@ -1,17 +1,20 @@
 ### VIBE CODING - Care Coordination & Treatment Workflow Platform
 
-# How to run (from root folder - "VibeCoding") -
+# How to run :
+From root folder -
 ```bash 
 docker compose up
 ```
 ```bash
 cd backend
 ```
-then 
+then -
 ```bash 
 npx prisma db seed
 ```
-Roles ->
+<br>
+
+#Roles ->
 - Super Admin
 - Org Admin
 - Patient
