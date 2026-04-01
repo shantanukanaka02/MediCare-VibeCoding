@@ -18,8 +18,10 @@ interface CreateUserInput {
   actorUserId: string;
   email: string;
   password: string;
-  roleNames: string[];
+  roleName: string;
 }
+
+const RESTRICTED_ADMIN_ASSIGNMENTS = new Set(["ORG_ADMIN", "SUPER_ADMIN"]);
 
 const mapUser = (user: any) => ({
   id: user.id,
@@ -41,25 +43,29 @@ export class UsersService {
 
   async listRoles(organizationId: string) {
     const roles = await this.usersRepository.listRoles(organizationId);
-    return roles.map((role) => ({
+    return roles
+      .filter((role) => !RESTRICTED_ADMIN_ASSIGNMENTS.has(role.name))
+      .map((role) => ({
       id: role.id,
       name: role.name,
       isSystem: role.isSystem,
-    }));
+      }));
   }
 
   async create(input: CreateUserInput, meta: RequestMeta) {
     return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      const uniqueRoleNames = Array.from(new Set(input.roleNames.map((name) => name.trim()).filter(Boolean)));
-      if (uniqueRoleNames.length === 0) {
-        throw badRequest("At least one role is required");
+      const roleName = input.roleName.trim();
+      if (!roleName) {
+        throw badRequest("Role is required");
       }
 
-      const roles = await this.usersRepository.findRolesByNames(input.organizationId, uniqueRoleNames, tx);
-      if (roles.length !== uniqueRoleNames.length) {
-        const foundNames = new Set(roles.map((role) => role.name));
-        const missing = uniqueRoleNames.filter((name) => !foundNames.has(name));
-        throw badRequest(`Unknown roles for tenant scope: ${missing.join(", ")}`);
+      if (RESTRICTED_ADMIN_ASSIGNMENTS.has(roleName)) {
+        throw badRequest("Admin cannot create ORG_ADMIN or SUPER_ADMIN users");
+      }
+
+      const roles = await this.usersRepository.findRolesByNames(input.organizationId, [roleName], tx);
+      if (roles.length !== 1) {
+        throw badRequest(`Unknown role for tenant scope: ${roleName}`);
       }
 
       const passwordHash = await hashPassword(input.password);

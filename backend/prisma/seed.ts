@@ -11,6 +11,7 @@ const prisma = new PrismaClient({
 });
 
 const ROLE_NAMES = {
+  SUPER_ADMIN: "SUPER_ADMIN",
   ORG_ADMIN: "ORG_ADMIN",
   PATIENT: "PATIENT",
   RECEPTIONIST: "RECEPTIONIST",
@@ -25,8 +26,10 @@ const ROLE_NAMES = {
 type RoleName = (typeof ROLE_NAMES)[keyof typeof ROLE_NAMES];
 
 const IDS = {
+  platformOrganization: "00000000-0000-0000-0000-000000000099",
   organization: "00000000-0000-0000-0000-000000000001",
   secondOrganization: "00000000-0000-0000-0000-000000000002",
+  superAdminUser: "10000000-0000-0000-0000-000000000099",
   adminUser: "10000000-0000-0000-0000-000000000001",
   patientUser: "10000000-0000-0000-0000-000000000009",
   nurseUser: "10000000-0000-0000-0000-000000000002",
@@ -37,6 +40,7 @@ const IDS = {
   billingUser: "10000000-0000-0000-0000-000000000007",
   complianceUser: "10000000-0000-0000-0000-000000000008",
   secondAdminUser: "10000000-0000-0000-0000-000000000010",
+  superAdminRole: "20000000-0000-0000-0000-000000000099",
   adminRole: "20000000-0000-0000-0000-000000000001",
   patientRole: "20000000-0000-0000-0000-000000000009",
   nurseRole: "20000000-0000-0000-0000-000000000002",
@@ -93,12 +97,24 @@ const PERMISSIONS = [
   { resource: "report", action: "read" },
   { resource: "user", action: "read" },
   { resource: "user", action: "create" },
+  { resource: "tenant", action: "read" },
+  { resource: "tenant", action: "create" },
+  { resource: "platform_user", action: "create" },
 ] as const;
 
 type PermissionKey = `${(typeof PERMISSIONS)[number]["resource"]}:${(typeof PERMISSIONS)[number]["action"]}`;
 
+const ORG_ADMIN_PERMISSION_KEYS = PERMISSIONS
+  .filter((permission) => !["tenant", "platform_user"].includes(permission.resource))
+  .map((permission) => `${permission.resource}:${permission.action}` as PermissionKey);
+
+const SUPER_ADMIN_PERMISSION_KEYS = PERMISSIONS.map(
+  (permission) => `${permission.resource}:${permission.action}` as PermissionKey,
+);
+
 const ROLE_PERMISSION_KEYS: Record<RoleName, readonly PermissionKey[]> = {
-  ORG_ADMIN: PERMISSIONS.map((permission) => `${permission.resource}:${permission.action}` as PermissionKey),
+  SUPER_ADMIN: SUPER_ADMIN_PERMISSION_KEYS,
+  ORG_ADMIN: ORG_ADMIN_PERMISSION_KEYS,
   PATIENT: [],
   RECEPTIONIST: ["patient:read", "patient:create", "appointment:read", "appointment:create", "triage_case:read", "triage_case:create"],
   CARE_NURSE: [
@@ -212,7 +228,21 @@ async function main(): Promise<void> {
     },
   });
 
+  const platformOrg = await prisma.organization.upsert({
+    where: { id: IDS.platformOrganization },
+    update: {
+      name: "EHCP Platform Control",
+      status: "ACTIVE",
+    },
+    create: {
+      id: IDS.platformOrganization,
+      name: "EHCP Platform Control",
+      status: "ACTIVE",
+    },
+  });
+
   const roleSeeds: RoleSeed[] = [
+    { id: IDS.superAdminRole, organizationId: platformOrg.id, name: ROLE_NAMES.SUPER_ADMIN, isSystem: true },
     { id: IDS.adminRole, organizationId: org.id, name: ROLE_NAMES.ORG_ADMIN, isSystem: true },
     { id: IDS.patientRole, organizationId: org.id, name: ROLE_NAMES.PATIENT, isSystem: false },
     { id: IDS.receptionistRole, organizationId: org.id, name: ROLE_NAMES.RECEPTIONIST, isSystem: false },
@@ -246,6 +276,13 @@ async function main(): Promise<void> {
   }
 
   const userSeeds: UserSeed[] = [
+    {
+      id: IDS.superAdminUser,
+      organizationId: platformOrg.id,
+      email: "superadmin@platform.health",
+      password: "SuperAdmin!12345",
+      roleName: ROLE_NAMES.SUPER_ADMIN,
+    },
     {
       id: IDS.adminUser,
       organizationId: org.id,

@@ -8,7 +8,7 @@ export const AdminPage = () => {
   const queryClient = useQueryClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [selectedRole, setSelectedRole] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const usersQuery = useQuery({
@@ -32,7 +32,7 @@ export const AdminPage = () => {
     onSuccess: () => {
       setEmail("");
       setPassword("");
-      setSelectedRoles([]);
+      setSelectedRole("");
       setError(null);
       void queryClient.invalidateQueries({ queryKey: ["admin-users"] });
     },
@@ -40,12 +40,6 @@ export const AdminPage = () => {
       setError("Unable to create user. Verify email uniqueness and role selection.");
     },
   });
-
-  const toggleRole = (roleName: string): void => {
-    setSelectedRoles((prev) =>
-      prev.includes(roleName) ? prev.filter((item) => item !== roleName) : [...prev, roleName],
-    );
-  };
 
   return (
     <div className="space-y-4">
@@ -67,30 +61,25 @@ export const AdminPage = () => {
             onChange={(event) => setPassword(event.target.value)}
           />
           <div>
-            <p className="mb-2 text-sm font-medium">Assign roles</p>
-            <div className="grid gap-2 md:grid-cols-2">
+            <p className="mb-2 text-sm font-medium">Assign role (single role only)</p>
+            <select value={selectedRole} onChange={(event) => setSelectedRole(event.target.value)}>
+              <option value="">Select role</option>
               {roleOptions.map((role) => (
-                <label key={role.id} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={selectedRoles.includes(role.name)}
-                    onChange={() => toggleRole(role.name)}
-                  />
-                  <span>{role.name}</span>
-                  {role.isSystem ? <span className="ml-auto text-xs text-slate-500">system</span> : null}
-                </label>
+                <option key={role.id} value={role.name}>
+                  {role.name}{role.isSystem ? " (system)" : ""}
+                </option>
               ))}
-            </div>
+            </select>
           </div>
           {error ? <p className="text-sm text-rose-700">{error}</p> : null}
           <button
             className="app-btn-primary"
-            disabled={!email || !password || selectedRoles.length === 0 || createMutation.isPending}
+            disabled={!email || !password || !selectedRole || createMutation.isPending}
             onClick={() =>
               createMutation.mutate({
                 email,
                 password,
-                roleNames: selectedRoles,
+                roleName: selectedRole,
               })
             }
           >

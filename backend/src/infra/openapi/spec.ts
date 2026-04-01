@@ -173,5 +173,28 @@ export const openApiSpec = {
         summary: "List available tenant roles",
       },
     },
+    "/v1/platform/tenants": {
+      get: {
+        summary: "Super admin list tenants",
+      },
+      post: {
+        summary: "Super admin create tenant",
+      },
+    },
+    "/v1/platform/tenant-roles": {
+      get: {
+        summary: "Super admin list roles for a tenant",
+      },
+    },
+    "/v1/platform/role-catalog": {
+      get: {
+        summary: "Super admin role catalog",
+      },
+    },
+    "/v1/platform/users": {
+      post: {
+        summary: "Super admin create user in any tenant",
+      },
+    },
   },
 } as const;

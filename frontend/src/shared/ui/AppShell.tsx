@@ -1,7 +1,7 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import type { Permission } from "../types/api";
 import { useAuth } from "../auth/auth-context";
-import { hasAnyPermission } from "../auth/access-control";
+import { hasAnyPermission, hasRole } from "../auth/access-control";
 import { logoutRequest } from "../../features/auth/auth.api";
 import { tokenStore } from "../auth/token-store";
 
@@ -9,6 +9,8 @@ interface NavItem {
   label: string;
   to: string;
   anyPermissions: Permission[];
+  includeRoles?: string[];
+  excludeRoles?: string[];
 }
 
 const navItems: NavItem[] = [
@@ -23,14 +25,35 @@ const navItems: NavItem[] = [
   { label: "Care Tasks", to: "/tasks", anyPermissions: ["task:read", "task:create", "task:update", "task:transition"] },
   { label: "Reports", to: "/reports", anyPermissions: ["report:read"] },
   { label: "Compliance & Audit", to: "/compliance", anyPermissions: ["audit_log:read"] },
-  { label: "Admin", to: "/admin", anyPermissions: ["user:read", "user:create"] },
+  { label: "Admin", to: "/admin", anyPermissions: ["user:read", "user:create"], includeRoles: ["ORG_ADMIN"], excludeRoles: ["SUPER_ADMIN"] },
+  { label: "Add Tenant ID", to: "/super-admin/tenants", anyPermissions: ["tenant:read", "tenant:create"] },
+  { label: "Add User (Global)", to: "/super-admin/users", anyPermissions: ["platform_user:create"] },
 ];
 
 export const AppShell = () => {
   const { user, clearSession } = useAuth();
   const navigate = useNavigate();
+  const isSuperAdmin = hasRole(user, "SUPER_ADMIN");
 
-  const visibleNavItems = navItems.filter((item) => hasAnyPermission(user, item.anyPermissions));
+  const visibleNavItems = navItems.filter((item) => {
+    if (isSuperAdmin) {
+      return item.to === "/super-admin/tenants" || item.to === "/super-admin/users";
+    }
+
+    if (!hasAnyPermission(user, item.anyPermissions)) {
+      return false;
+    }
+
+    if (item.includeRoles && item.includeRoles.length > 0 && !item.includeRoles.some((role) => hasRole(user, role))) {
+      return false;
+    }
+
+    if (item.excludeRoles && item.excludeRoles.some((role) => hasRole(user, role))) {
+      return false;
+    }
+
+    return true;
+  });
 
   const handleLogout = async (): Promise<void> => {
     const refreshToken = tokenStore.getRefreshToken();

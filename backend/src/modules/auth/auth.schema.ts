@@ -2,7 +2,16 @@ import { z } from "zod";
 
 export const loginSchema = {
   body: z.object({
-    organizationId: z.string().uuid(),
+    organizationId: z.preprocess(
+      (value) => {
+        if (typeof value !== "string") {
+          return value;
+        }
+        const trimmed = value.trim();
+        return trimmed.length === 0 ? undefined : trimmed;
+      },
+      z.string().uuid().optional(),
+    ),
     email: z.string().email(),
     password: z.string().min(8),
   }),

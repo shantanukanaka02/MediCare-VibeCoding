@@ -12,6 +12,7 @@ import { billingTriggersRouter } from "../modules/billing-triggers/billing-trigg
 import { auditRouter } from "../modules/audit/audit.routes";
 import { reportsRouter } from "../modules/reports/reports.routes";
 import { usersRouter } from "../modules/users/users.routes";
+import { platformAdminRouter } from "../modules/platform-admin/platform-admin.routes";
 import { openApiSpec } from "../infra/openapi/spec";
 
 export const apiRouter = Router();
@@ -29,6 +30,7 @@ apiRouter.use("/v1/billing-triggers", billingTriggersRouter);
 apiRouter.use("/v1/audit-logs", auditRouter);
 apiRouter.use("/v1/reports", reportsRouter);
 apiRouter.use("/v1/users", usersRouter);
+apiRouter.use("/v1/platform", platformAdminRouter);
 apiRouter.get("/openapi.json", (_req, res) => {
   res.status(200).json(openApiSpec);
 });

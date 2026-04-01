@@ -73,6 +73,36 @@ export class AuthRepository {
     return user ? this.toAccessSnapshot(user) : null;
   }
 
+  async findGlobalSuperAdminByEmail(email: string): Promise<UserAccessSnapshot | null> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        email: email.toLowerCase(),
+        userRoles: {
+          some: {
+            role: {
+              name: "SUPER_ADMIN",
+            },
+          },
+        },
+      },
+      include: {
+        userRoles: {
+          include: {
+            role: {
+              include: {
+                rolePermissions: {
+                  include: { permission: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return user ? this.toAccessSnapshot(user) : null;
+  }
+
   async findUserById(organizationId: string, userId: string): Promise<UserAccessSnapshot | null> {
     const user = await this.prisma.user.findFirst({
       where: {

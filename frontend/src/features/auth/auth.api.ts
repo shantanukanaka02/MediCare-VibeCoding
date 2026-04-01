@@ -2,7 +2,7 @@ import type { ApiSuccess, AuthUser } from "../../shared/types/api";
 import { apiClient } from "../../shared/api/axios";
 
 interface LoginPayload {
-  organizationId: string;
+  organizationId?: string;
   email: string;
   password: string;
 }

@@ -13,6 +13,8 @@ import { TasksPage } from "../features/tasks/TasksPage";
 import { ReportsPage } from "../features/reports/ReportsPage";
 import { CompliancePage } from "../features/audit/CompliancePage";
 import { AdminPage } from "../features/admin/AdminPage";
+import { TenantsPage } from "../features/super-admin/TenantsPage";
+import { PlatformUsersPage } from "../features/super-admin/PlatformUsersPage";
 import { ProtectedRoute } from "../shared/ui/ProtectedRoute";
 import { PermissionGate } from "../shared/ui/PermissionGate";
 import { AppShell } from "../shared/ui/AppShell";
@@ -124,8 +126,24 @@ export const router = createBrowserRouter([
           {
             path: "/admin",
             element: (
-              <PermissionGate anyPermissions={["user:read", "user:create"]}>
+              <PermissionGate anyPermissions={["user:read", "user:create"]} anyRoles={["ORG_ADMIN"]}>
                 <AdminPage />
+              </PermissionGate>
+            ),
+          },
+          {
+            path: "/super-admin/tenants",
+            element: (
+              <PermissionGate anyPermissions={["tenant:read", "tenant:create"]}>
+                <TenantsPage />
+              </PermissionGate>
+            ),
+          },
+          {
+            path: "/super-admin/users",
+            element: (
+              <PermissionGate anyPermissions={["platform_user:create"]}>
+                <PlatformUsersPage />
               </PermissionGate>
             ),
           },

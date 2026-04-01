@@ -17,7 +17,7 @@ import { AuthRepository } from "./auth.repository";
 import type { AuthResponse } from "./auth.types";
 
 interface LoginInput {
-  organizationId: string;
+  organizationId?: string;
   email: string;
   password: string;
   ip: string;
@@ -27,7 +27,10 @@ export class AuthService {
   constructor(private readonly authRepository: AuthRepository) {}
 
   async login(input: LoginInput): Promise<AuthResponse> {
-    const user = await this.authRepository.findUserByEmail(input.organizationId, input.email);
+    const user = input.organizationId
+      ? await this.authRepository.findUserByEmail(input.organizationId, input.email)
+      : await this.authRepository.findGlobalSuperAdminByEmail(input.email);
+
     if (!user) {
       await registerFailedAttempt(input.ip, input.email);
       throw unauthorized("Invalid credentials");

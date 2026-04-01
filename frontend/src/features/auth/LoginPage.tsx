@@ -28,7 +28,10 @@ export const LoginPage = () => {
 
     setLoading(true);
     try {
-      const result = await loginRequest(parsed.data);
+      const result = await loginRequest({
+        ...parsed.data,
+        organizationId: parsed.data.organizationId || undefined,
+      });
       setSession({
         user: result.user,
         accessToken: result.accessToken,
@@ -46,10 +49,10 @@ export const LoginPage = () => {
     <div className="min-h-screen grid place-items-center p-6">
       <form onSubmit={onSubmit} className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-7 shadow-xl space-y-4">
         <h1 className="app-title">EHCP Login</h1>
-        <p className="app-subtitle">Secure multi-tenant sign-in with organization scope.</p>
+        <p className="app-subtitle">Tenant ID is optional for SUPER_ADMIN login.</p>
 
         <label className="block text-sm font-medium">
-          Organization ID
+          Organization ID (optional for SUPER_ADMIN)
           <input
             className="mt-1"
             value={form.organizationId}

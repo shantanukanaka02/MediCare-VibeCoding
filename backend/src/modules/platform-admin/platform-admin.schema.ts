@@ -1,13 +1,22 @@
 import { z } from "zod";
 
-export const listUsersSchema = {
+export const listTenantRolesSchema = {
   query: z.object({
-    limit: z.coerce.number().int().min(1).max(200).default(50),
+    organizationId: z.string().uuid(),
   }),
 };
 
-export const createUserSchema = {
+export const createTenantSchema = {
   body: z.object({
+    id: z.string().uuid(),
+    name: z.string().min(2).max(120),
+    status: z.enum(["ACTIVE", "INACTIVE"]).default("ACTIVE"),
+  }),
+};
+
+export const createPlatformUserSchema = {
+  body: z.object({
+    organizationId: z.string().uuid(),
     email: z.string().email(),
     password: z
       .string()

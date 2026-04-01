@@ -230,3 +230,11 @@ export interface RoleRecord {
   name: string;
   isSystem: boolean;
 }
+
+export interface TenantRecord {
+  id: string;
+  name: string;
+  status: "ACTIVE" | "INACTIVE";
+  createdAt: string;
+  userCount: number;
+}

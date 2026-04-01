@@ -13,6 +13,10 @@ export const defaultHomePath = (user: AuthUser | null): string => {
     return "/login";
   }
 
+  if (hasRole(user, "SUPER_ADMIN")) {
+    return "/super-admin/tenants";
+  }
+
   if (hasPermission(user, "report:read")) {
     return "/dashboard";
   }

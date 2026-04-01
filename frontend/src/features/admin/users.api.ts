@@ -4,7 +4,7 @@ import type { ApiSuccess, RoleRecord, UserRecord } from "../../shared/types/api"
 interface CreateUserPayload {
   email: string;
   password: string;
-  roleNames: string[];
+  roleName: string;
 }
 
 export const listUsersRequest = async (): Promise<UserRecord[]> => {
